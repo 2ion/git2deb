@@ -1,0 +1,99 @@
+## git2deb
+
+_Original release post: http://crunchbang.org/forums/viewtopic.php?pid=421025_
+
+For people who do not know how to build or do not have (yet) experience
+in building Debian packages the right way or are lost in the variety of
+tools that exist for building Debian packages from sources hosted in git
+repos, and for whacky developers, I have written a quick-and-dirty Bash
+script that automates the build process. Well, partially.
+
+This script makes assumptions about how the repository is laid out and
+probably does not handle edge cases and special cases very well, or at
+all. The script has been tested only with the developer scripts on a
+sid/unstable system. Who knows if it works on stable/waldorf/wheezy. It
+should work on testing though. Or could. Whatever.
+
+### Synopsis
+
+```
+Usage:
+  git2deb [-h] git-url [git-branch]
+Where:
+  -h          Print this message and exit
+  git-url     Git clone URL, see git-clone(1)
+  git-branch  Git branch the package sources are located on
+Minimal dependencies:
+  devscripts, equivs, dh-make, sudo, debhelper
+```
+
+### Prerequisites
+
+```
+sudo apt-get install sudo apt-get install devscripts equivs dh-make sudo debhelper
+```
+
+### Limitations
+
+The script will only build packages which are in the package source
+format version 3.0. These packages have a lowercase 'debian' directory
+in their tree. Lots of the bunsen packages have not yet been converted
+(they have an uppercase DEBIAN directory). The script performs a
+superficial check and aborts if it fails.
+
+I also forcibly set the package class argument of <code>dh\_make</code>
+to -s (single binary), even when the package does build e.g. an
+architecture-independent package. Hitherto, it seems that regardless of
+the package class, packages are being built correctly. When leaving of
+the package class, the user is shown a selection prompt for the package
+class. Since noops don't know about this, I just went ahead with setting
+the flag. In the case of problems, I'll just remove it and enable the
+prompt again (you can do this, too). Side effect: The
+<code>\*.changes</code> file's name may include a different architecture
+than the main package. But for a hacky build like this, that doesn't
+matter.
+
+The script will also refuse to run as root (it's for your best).
+
+### Example usage
+
+Find a git-hosted Debian package you want to build, for example the
+deb8-theme package from Bunsen: https://github.com/BunsenLabs/deb8-theme.
+Find the 'git clone url' of that package; on Github it is being shown on the right:
+
+```
+https://github.com/BunsenLabs/deb8-theme.git
+```
+
+Note the git branch the debian package sources are located on. In our
+case, it is 'master'.
+
+Go to the directory you want to find the built package in later, for
+example:
+
+```
+$ mkdir ~/deb8-theme-builds
+$ cd ~/deb8-theme-builds
+```
+
+Run the script (supposing it is in your $PATH) like so:
+
+```
+git2deb https://github.com/BunsenLabs/deb8-theme.git master
+```
+
+The last argument 'master' is optional, it defaults to 'master' when
+omitted.
+
+Text scrolls by, and you will be prompted for your sudo password twice:
+once for installing build dependencies using a helper package built on
+the fly, and once for removing that helper package again.
+
+You should find the built package in your current working directory:
+
+```
+$ ls ~/deb8-theme-builds
+deb8-theme_1.1-1_all.deb
+deb8-theme_1.1-1_amd64.changes
+deb8-theme_1.1-1.dsc
+```
