@@ -21,10 +21,6 @@ if [[ "$(id -u)" = 0 ]] ; then
   exit 1
 fi
 
-# Build Debian packages from git
-# Copyright 2015 Jens John <dev .at. 2ion .dot. de>
-# Licensed under the terms of the GNU GPL v3+
-
 usage () {
   echo "Usage:"
   echo "  ${0##*/} [-h] git-url [git-branch]"
